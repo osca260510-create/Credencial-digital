@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credencial Digital del Árbol</title>
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --primary-light: #e8f5e9;
+            --text-main: #1b5e20;
+            --text-dark: #333333;
+            --bg-card: #ffffff;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f1f8e9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .card-container {
+            width: 100%;
+            max-width: 420px;
+            background: var(--bg-card);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            border: 2px solid #c8e6c9;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .school-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            opacity: 0.9;
+            outline: none;
+        }
+
+        .card-body {
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            margin-top: -65px;
+            margin-bottom: 16px;
+            cursor: pointer;
+        }
+
+        .avatar-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 5px solid var(--bg-card);
+            object-fit: cover;
+            background-color: #f5f5f5;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-placeholder {
+            font-size: 60px;
+        }
+
+        .camera-badge {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: var(--primary-color);
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .tree-name {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 4px;
+            text-align: center;
+            outline: none;
+            border-bottom: 1px dashed transparent;
+        }
+        .tree-name:focus {
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tree-species {
+            font-size: 15px;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 24px;
+            text-align: center;
+            outline: none;
+        }
+
+        .info-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .info-item {
+            background: #fafafa;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #eeeeee;
+        }
+
+        .info-item.full-width {
+            grid-column: span 2;
+        }
+
+        .info-label {
+            font-size: 11px;
+            color: #777;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: var(--text-dark);
+            font-weight: 600;
+            outline: none;
+        }
+
+        .accordion-container {
+            width: 100%;
+            margin-bottom: 24px;
+        }
+
+        .accordion-item {
+            margin-bottom: 8px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+
+        .accordion-header {
+            background-color: var(--primary-light);
+            color: var(--text-main);
+            padding: 14px 16px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+            user-select: none;
+        }
+
+        .accordion-header:active {
+            background-color: #c8e6c9;
+        }
+
+        .accordion-icon {
+            font-size: 12px;
+            transition: transform 0.3s;
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            background: #ffffff;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .accordion-inner {
+            padding: 16px;
+            font-size: 14px;
+            color: #444;
+            line-height: 1.5;
+            outline: none;
+            min-height: 40px;
+        }
+
+        .accordion-item.active .accordion-icon {
+            transform: rotate(180px);
+        }
+
+        .qr-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 2px dashed #e0e0e0;
+            margin-top: 8px;
+        }
+
+        .qr-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #777;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .qr-box {
+            background: white;
+            padding: 12px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            border: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .qr-box:active {
+            transform: scale(0.98);
+        }
+
+        .qr-placeholder {
+            width: 130px;
+            height: 130px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hint-text {
+            font-size: 11px;
+            color: #999;
+            margin-top: 8px;
+            text-align: center;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card-container">
+        <!-- Encabezado de la Escuela -->
+        <div class="card-header">
+            <div class="school-title" contenteditable="true">Escuela Primaria Verde Verde</div>
+        </div>
+
+        <div class="card-body">
+            <!-- Selector de Foto -->
+            <div class="avatar-container" onclick="document.getElementById('file-input').click()">
+                <div class="avatar-image" id="photo-preview">
+                    <span class="avatar-placeholder" id="avatar-icon">🌳</span>
+                </div>
+                <div class="camera-badge">📸</div>
+            </div>
+            <input type="file" id="file-input" accept="image/*" onchange="previewImage(event)">
+
+            <!-- Título y Especie -->
+            <div class="tree-name" contenteditable="true">Panchito</div>
+            <div class="tree-species" contenteditable="true">Ficus benjamina</div>
+
+            <!-- Ficha de Datos Grid -->
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Fecha de adopción</div>
+                    <div class="info-value" contenteditable="true">22/09/2026</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Altura actual</div>
+                    <div class="info-value" contenteditable="true">1.45 metros</div>
+                </div>
+                <div class="info-item full-width">
+                    <div class="info-label">Estado observado</div>
+                    <div class="info-value" contenteditable="true">Saludable y en crecimiento activo</div>
+                </div>
+                <div class="info-item full-width">
+                    <div class="info-label">Integrantes del equipo</div>
+                    <div class="info-value" contenteditable="true">Sofía Martínez, Lucas Pérez, Mateo Gómez, Valentina Ruiz</div>
+                </div>
+            </div>
+
+            <!-- Botones Acordeón de Cuidados e Historia -->
+            <div class="accordion-container">
+                
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Información de riego y poda</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner" contenteditable="true">
+                            <strong>Riego:</strong> Dos veces por semana por la mañana (aproximadamente 5 litros de agua).<br>
+                            <strong>Poda:</strong> Solo quitar ramas secas durante los meses de invierno para mantener su fuerza.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Mi historia</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner" contenteditable="true">
+                            Llegué a la escuela como una pequeña donación de la comunidad escolar. Fuimos sembrados en el patio central con la ayuda de los profesores y los alumnos de quinto grado para celebrar el día del medio ambiente.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Mis cuidados</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner" contenteditable="true">
+                            Es importante limpiar la basura alrededor de mi cajete, cuidar que nadie rompa mis ramitas tiernas y colocar abono orgánico cada seis meses para nutrir mis raíces de forma natural.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Mi crecimiento</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner" contenteditable="true">
+                            <strong>Mes 1:</strong> 1.20m (Siembra inicial).<br>
+                            <strong>Mes 3:</strong> 1.35m (Aparecieron hojas nuevas).<br>
+                            <strong>Mes 6:</strong> 1.45m (Tallo principal más grueso).
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Revisión de salud</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-inner" contenteditable="true">
+                            Última revisión realizada la semana pasada. No se detectaron plagas, hongos ni hormigas. Las hojas muestran un color verde vivo e intenso, indicando una correcta absorción de nutrientes.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Nueva sección de código QR integrado de forma local -->
+            <div class="qr-section">
+                <div class="qr-title">Código QR del Árbol</div>
+                <div class="qr-box" onclick="generateNewQR()" title="Click para simular o cambiar enlace">
+                    <div class="qr-placeholder" id="qr-container"></div>
+                </div>
+                <div class="hint-text">💡 Toca cualquier texto para editarlo. Para el QR, usa un enlace público que tu amigo pueda abrir.</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script ligero para control de acordeón, imagen y generación nativa de QR -->
+    <script>
+        // Función para abrir y cerrar acordeones de forma dinámica
+        function toggleAccordion(header) {
+            const item = header.parentElement;
+            const content = item.querySelector('.accordion-content');
+            
+            // Cerrar otros abiertos si se desea (opcional)
+            const allItems = document.querySelectorAll('.accordion-item');
+            allItems.forEach(i => {
+                if (i !== item && i.classList.contains('active')) {
+                    i.classList.remove('active');
+                    i.querySelector('.accordion-content').style.maxHeight = null;
+                }
+            });
+
+            item.classList.toggle('active');
+            if (item.classList.contains('active')) {
+                content.style.maxHeight = content.scrollHeight + "px";
+            } else {
+                content.style.maxHeight = null;
+            }
+        }
+
+        // Previsualizar la foto cargada por el celular de forma inmediata
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const preview = document.getElementById('photo-preview');
+                preview.innerHTML = ''; // Elimina el emoji inicial
+                preview.style.backgroundImage = `url('${reader.result}')`;
+                preview.style.backgroundSize = 'cover';
+                preview.style.backgroundPosition = 'center';
+            }
+            if(event.target.files[0]) {
+                reader.readAsDataURL(event.target.files[0]);
+            }
+        }
+
+        // Generador de QR.
+        // IMPORTANTE: el QR solo funcionará para otras personas si contiene
+        // un enlace público que ellas puedan abrir desde Internet.
+        function renderQR(text) {
+            const container = document.getElementById('qr-container');
+            const encodedText = encodeURIComponent(text);
+            container.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${encodedText}" alt="QR Code" style="width:100%; height:100%; border-radius:8px;">`;
+        }
+
+        function generateNewQR() {
+            const currentURL = window.location.href;
+            const promptValue = prompt(
+                "Pega aquí el ENLACE PÚBLICO de esta credencial (por ejemplo, un enlace de Google Drive, GitHub Pages o un sitio web).",
+                currentURL.startsWith("http") ? currentURL : ""
+            );
+            if (promptValue !== null && promptValue.trim() !== "") {
+                renderQR(promptValue.trim());
+            }
+        }
+
+        // No ponemos una URL falsa. El usuario debe introducir un enlace público.
+        window.onload = function() {
+            const container = document.getElementById('qr-container');
+            container.innerHTML = '<div style="font-size:12px;color:#777;text-align:center;padding:10px;">Toca aquí para poner el enlace público de tu credencial</div>';
+        };
+    </script>
+</body>
+</html>
